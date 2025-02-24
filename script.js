@@ -4,24 +4,45 @@ document.addEventListener("DOMContentLoaded", function () {
   const walletBalance = document.getElementById("wallet-balance");
   const clearButton = document.getElementById("clear-data");
   const darkModeToggle = document.getElementById("dark-mode-toggle");
+  const monthFilter = document.getElementById("month-filter");
+  const yearFilter = document.getElementById("year-filter");
+  const applyFilterButton = document.getElementById("apply-filter");
+  const resetFilterButton = document.getElementById("reset-filter"); // New Reset Filter Button
+
+  const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+  ];
+
+  months.forEach((month, index) => {
+      let option = document.createElement("option");
+      option.value = index + 1; // Month number (1-12)
+      option.textContent = month;
+      monthFilter.appendChild(option);
+  });
+
+  const currentYear = new Date().getFullYear();
+  for (let i = currentYear; i >= currentYear - 5; i--) {
+      let option = document.createElement("option");
+      option.value = i;
+      option.textContent = i;
+      yearFilter.appendChild(option);
+  }
 
   let balance = parseFloat(localStorage.getItem("balance")) || 0;
   let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
-  let darkMode = localStorage.getItem("darkMode") === "enabled"; 
+  let darkMode = localStorage.getItem("darkMode") === "enabled";
 
   if (darkMode) {
       document.body.classList.add("dark-mode");
   }
 
-  darkModeToggle.addEventListener("click", function () {
-      document.body.classList.toggle("dark-mode");
-
-      if (document.body.classList.contains("dark-mode")) {
-          localStorage.setItem("darkMode", "enabled");
-      } else {
-          localStorage.setItem("darkMode", "disabled");
-      }
-  });
+  if (darkModeToggle) {
+      darkModeToggle.addEventListener("click", function () {
+          document.body.classList.toggle("dark-mode");
+          localStorage.setItem("darkMode", document.body.classList.contains("dark-mode") ? "enabled" : "disabled");
+      });
+  }
 
   function saveData() {
       localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -30,11 +51,35 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function loadTransactions() {
       transactionList.innerHTML = "";
-      transactions.forEach(({ name, amount, type }) => {
-          addTransaction(name, amount, type, false);
+      transactions.forEach(({ name, amount, type, date }) => {
+          addTransaction(name, amount, type, false, date);
       });
       walletBalance.textContent = balance.toFixed(2);
   }
+
+  applyFilterButton.addEventListener("click", function () {
+      const selectedMonth = parseInt(monthFilter.value);
+      const selectedYear = parseInt(yearFilter.value);
+
+      transactionList.innerHTML = "";
+
+      transactions.forEach(({ name, amount, type, date }) => {
+          const transactionDate = new Date(date);
+          const transactionMonth = transactionDate.getMonth() + 1;
+          const transactionYear = transactionDate.getFullYear();
+
+          if (transactionMonth === selectedMonth && transactionYear === selectedYear) {
+              addTransaction(name, amount, type, false, date);
+          }
+      });
+  });
+
+  // ✅ New "Reset Filter" button event
+  resetFilterButton.addEventListener("click", function () {
+      loadTransactions(); // Reloads all transactions
+      monthFilter.value = "";
+      yearFilter.value = "";
+  });
 
   form.addEventListener("submit", function (event) {
       event.preventDefault();
@@ -48,18 +93,23 @@ document.addEventListener("DOMContentLoaded", function () {
           return;
       }
 
-      transactions.push({ name, amount, type });
+      const date = new Date().toISOString();
+      transactions.push({ name, amount, type, date });
+
       saveData();
-      addTransaction(name, amount, type, true);
+      addTransaction(name, amount, type, true, date);
       updateWallet(type, amount);
       form.reset();
   });
 
-  function addTransaction(name, amount, type, save = true) {
+  function addTransaction(name, amount, type, save = true, date = new Date().toISOString()) {
+      const transactionDate = new Date(date);
+      const formattedDate = transactionDate.toLocaleDateString();
+
       const li = document.createElement("li");
       li.classList.add(type);
-      li.innerHTML = `${name} - $${amount} 
-          <button onclick="removeTransaction(this, ${amount}, '${type}', '${name}')">❌</button>`;
+      li.innerHTML = `${formattedDate} - ${name} - $${amount} 
+          <button onclick="removeTransaction(this, ${amount}, '${type}', '${name}', '${date}')">❌</button>`;
 
       transactionList.appendChild(li);
 
@@ -76,16 +126,13 @@ document.addEventListener("DOMContentLoaded", function () {
       saveData();
   }
 
-  window.removeTransaction = function (button, amount, type, name) {
-      button.parentElement.remove();
-      transactions = transactions.filter(transaction => transaction.name !== name);
-      
-      if (type === "income") {
-          balance -= amount;
-      } else {
-          balance += amount;
-      }
+  window.removeTransaction = function (button, amount, type, name, date) {
+      const index = transactions.findIndex(t => t.name === name && t.amount === amount && t.type === type && t.date === date);
+      if (index !== -1) transactions.splice(index, 1);
 
+      button.parentElement.remove();
+
+      balance += (type === "income") ? -amount : amount;
       walletBalance.textContent = balance.toFixed(2);
       saveData();
   };

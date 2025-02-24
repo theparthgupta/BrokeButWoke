@@ -11,7 +11,7 @@
     <div class="container">
         <button id="dark-mode-toggle">Dark Mode🌙 </button>
         <h1>Broke But Woke 💸</h1>
-        
+
         <h2>Wallet Balance: $<span id="wallet-balance">0</span></h2>
 
         <form id="transaction-form">
@@ -24,6 +24,11 @@
             <button type="submit">Add Transaction</button>
             <button id="clear-data">🗑️ Clear All Data</button>
         </form>
+        <label for="month-filter">Filter by Month:</label>
+        <select id="month-filter"></select>
+        <select id="year-filter"></select>
+        <button id="apply-filter">Apply Filter</button>
+        <button id="reset-filter">Reset Filter</button>
 
         <h2>Transaction History</h2>
         <ul id="transaction-list"></ul>
