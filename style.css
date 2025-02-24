@@ -1,8 +1,10 @@
+/* Light Mode (Default) */
 body {
   font-family: Arial, sans-serif;
   background-color: #f4f4f4;
   text-align: center;
   padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
@@ -12,9 +14,10 @@ body {
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin: auto;
+  transition: background-color 0.3s;
 }
 
-h1 {
+h1, h2 {
   color: #333;
 }
 
@@ -27,6 +30,8 @@ input, select, button {
   margin: 5px 0;
   padding: 10px;
   font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 button {
@@ -34,6 +39,7 @@ button {
   color: white;
   border: none;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 button:hover {
@@ -52,7 +58,42 @@ li {
   border-left: 5px solid;
   display: flex;
   justify-content: space-between;
+  border-radius: 5px;
 }
 
 li.income { border-color: #28a745; }
 li.expense { border-color: #dc3545; }
+
+/* Dark Mode */
+body.dark-mode {
+  background-color: #121212;
+  color: #ffffff; /* Light text for readability */
+}
+
+.dark-mode .container {
+  background-color: #222;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+/* Make headings bright in Dark Mode */
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode #wallet-balance {
+  color: #ffffff;
+}
+
+/* Form elements in Dark Mode */
+.dark-mode input,
+.dark-mode select,
+.dark-mode button {
+  background-color: #333;
+  color: #ffffff;
+  border: 1px solid #ffffff;
+}
+
+/* Transactions list */
+.dark-mode li {
+  background: #333;
+  color: #ffffff;
+}
+

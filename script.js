@@ -2,9 +2,26 @@ document.addEventListener("DOMContentLoaded", function () {
   const form = document.getElementById("transaction-form");
   const transactionList = document.getElementById("transaction-list");
   const walletBalance = document.getElementById("wallet-balance");
+  const clearButton = document.getElementById("clear-data");
+  const darkModeToggle = document.getElementById("dark-mode-toggle");
 
   let balance = parseFloat(localStorage.getItem("balance")) || 0;
   let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+  let darkMode = localStorage.getItem("darkMode") === "enabled"; 
+
+  if (darkMode) {
+      document.body.classList.add("dark-mode");
+  }
+
+  darkModeToggle.addEventListener("click", function () {
+      document.body.classList.toggle("dark-mode");
+
+      if (document.body.classList.contains("dark-mode")) {
+          localStorage.setItem("darkMode", "enabled");
+      } else {
+          localStorage.setItem("darkMode", "disabled");
+      }
+  });
 
   function saveData() {
       localStorage.setItem("transactions", JSON.stringify(transactions));
@@ -72,6 +89,16 @@ document.addEventListener("DOMContentLoaded", function () {
       walletBalance.textContent = balance.toFixed(2);
       saveData();
   };
+
+  clearButton.addEventListener("click", function () {
+      if (confirm("Are you sure you want to clear all data?")) {
+          localStorage.clear();
+          transactions = [];
+          balance = 0;
+          transactionList.innerHTML = "";
+          walletBalance.textContent = "0.00";
+      }
+  });
 
   loadTransactions();
 });
